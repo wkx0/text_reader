@@ -1,11 +1,13 @@
 from PyQt5 import QtCore
-from PyQt5.QtCore import QMetaObject
+from PyQt5.QtCore import QMetaObject, pyqtSignal
 from PyQt5.QtWidgets import QFileDialog, QColorDialog, QMessageBox
 
 from ui.setting_ui import SettingUI
 
 
 class SettingEvent(SettingUI):
+    _signal: pyqtSignal = pyqtSignal(str, str, str, str, str)
+    _close_signal: pyqtSignal = pyqtSignal(str)
 
     def __init__(self):
         super().__init__()
@@ -17,7 +19,6 @@ class SettingEvent(SettingUI):
         options = QFileDialog.Options()
         file_path, _ = QFileDialog.getOpenFileName(self, "选择文件", "", "Text Files (*.txt)",
                                                    options=options)
-
         if file_path:
             self.file_Edit.setText(file_path)
 
@@ -43,11 +44,19 @@ class SettingEvent(SettingUI):
 
     @QtCore.pyqtSlot()
     def on_save_button_clicked(self):
-        self.conf.set_text_path(self.file_Edit.text())
-        self.conf.set_line_height(self.line_height_Edit.text())
-        self.conf.set_font_size(self.font_size_Edit.text())
-        self.conf.set_font_color(self.font_color_Edit.text())
-        self.conf.set_background_color(self.background_color_Edit.text())
+        file = self.file_Edit.text()
+        line_height = self.line_height_Edit.text()
+        font_size = self.font_size_Edit.text()
+        font_color = self.font_color_Edit.text()
+        background_color = self.background_color_Edit.text()
+
+        self.conf.set_text_path(file)
+        self.conf.set_line_height(line_height)
+        self.conf.set_font_size(font_size)
+        self.conf.set_font_color(font_color)
+        self.conf.set_background_color(background_color)
+        # 通知主窗口更新UI
+        self._signal.emit(file, line_height, font_size, font_color, background_color)
         msg = QMessageBox(self)
         msg.setIcon(QMessageBox.Information)
         msg.setText("保存成功！")
@@ -57,6 +66,7 @@ class SettingEvent(SettingUI):
     @QtCore.pyqtSlot()
     def on_close_button_clicked(self):
         self.close()
+        self._close_signal.emit("close")
 
     def load_config(self):
         if self.conf.text_path != "":
@@ -69,3 +79,11 @@ class SettingEvent(SettingUI):
             self.font_color_Edit.setText(self.conf.font_color)
         if self.conf.background_color != "":
             self.background_color_Edit.setText(self.conf.background_color)
+
+    @property
+    def signal(self):
+        return self._signal
+
+    @property
+    def close_signal(self):
+        return self._close_signal

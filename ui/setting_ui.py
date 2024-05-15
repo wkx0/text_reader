@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QWidget, QApplication, QLabel, QLineEdit, QSpinBox, QPushButton, QHBoxLayout, QVBoxLayout, \
     QSpacerItem, QSizePolicy
@@ -13,6 +13,8 @@ class SettingUI(QWidget):
     def __init__(self):
         super().__init__()
         self.conf = Conf(self.confPath)
+        # 防止主窗口跟随子窗口一起关闭
+        self.setWindowFlag(QtCore.Qt.Tool)
 
         self.file_label = QLabel("文件：")
         self.line_height_label = QLabel("行高：")
