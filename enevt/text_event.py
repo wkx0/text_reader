@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import QApplication, QSystemTrayIcon, QMenu, QAction, QMess
 
 from ui.text_ui import TextUI
 from windows.setting_windows import SettingWin
+from public import logo_ico
 
 
 class TextEvent(TextUI):
@@ -213,7 +214,7 @@ class TextEvent(TextUI):
         self.tray_icon.setContextMenu(tray_menu)
 
         # 设置托盘图标的默认图标
-        default_icon = QIcon("./public/icon/logo.png")
+        default_icon = QIcon(QIcon(':/logo.ico'))
         self.tray_icon.setIcon(default_icon)
 
         # 设置托盘图标的鼠标提示
