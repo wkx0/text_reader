@@ -26,7 +26,7 @@ class TextUI(QWidget):
         self.hide_style = ""
 
         # 文本编辑框
-        self.plain_text = MyQPlainTextEdit(self.conf)
+        self.plain_text = MyQPlainTextEdit()
         self.plain_text.setReadOnly(True)
         # 任务栏图标不显示
         self.plain_text.setTextInteractionFlags(Qt.NoTextInteraction)

@@ -7,9 +7,8 @@ from utils.config_utils import Conf
 
 class MyQPlainTextEdit(QPlainTextEdit):
 
-    def __init__(self, conf):
+    def __init__(self):
         super().__init__()
-        self.conf = conf
         self.setMouseTracking(True)  # 启用鼠标跟踪功能
 
     def wheelEvent(self, event):
