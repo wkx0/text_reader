@@ -1,6 +1,7 @@
-from PyQt5.QtCore import pyqtSignal, Qt, QRect, QMetaObject, QEvent, QTimer, QCoreApplication
-from PyQt5.QtGui import QEnterEvent, QIcon, QGuiApplication
-from PyQt5.QtWidgets import QApplication, QSystemTrayIcon, QMenu, QAction
+from PyQt5.QtCore import pyqtSignal, Qt, QRect, QMetaObject, QEvent, QTimer, QCoreApplication, QUrl, QFile, QIODevice, \
+    QTextStream
+from PyQt5.QtGui import QEnterEvent, QIcon, QGuiApplication, QTextDocument
+from PyQt5.QtWidgets import QApplication, QSystemTrayIcon, QMenu, QAction, QMessageBox
 
 from ui.text_ui import TextUI
 from windows.setting_windows import SettingWin
@@ -11,6 +12,7 @@ class TextEvent(TextUI):
 
     def __init__(self):
         super().__init__()
+        self.cur_file = ""
         self.tray_icon = None  # 托盘图标
         self.setting_win = SettingWin()  # 设置窗口
         self.is_show_setting_win = False  # 是否显示设置窗口
@@ -35,6 +37,7 @@ class TextEvent(TextUI):
         self.plain_text.verticalScrollBar().valueChanged.connect(self.scroll_value_changed)
         self.setting_win.signal.connect(self.update_ui)
         self.setting_win.close_signal.connect(self.setting_win_close)
+        self.setting_win.find_signal.connect(self.find_text)
 
     def mousePressEvent(self, event):
         """
@@ -128,7 +131,9 @@ class TextEvent(TextUI):
         :param event:
         :return:
         """
+        self.cur_file = self.conf.text_path
         text = self.load_text(self.conf.text_path)
+        self.plain_text.setPlainText(text)
         if text != "":
             self.plain_text.setPlainText(text)
             if self.conf.line != "":
@@ -153,11 +158,17 @@ class TextEvent(TextUI):
         self.conf.set_win_y(event.pos().y())
 
     def update_ui(self, file, line_height, font_size, font_color, background_color):
+        if file != self.cur_file:
+            self.cur_file = file
+            text = self.load_text(file)
+            self.plain_text.setPlainText(text)
         self.plain_text.setStyleSheet(self.generate_style(font_color, font_size, line_height, background_color))
 
     def setting_win_close(self):
         self.is_show_setting_win = False
-        # self.plain_text.setStyleSheet(self.hide_style)
+        cursor = self.plain_text.textCursor()
+        cursor.clearSelection()
+        self.plain_text.setTextCursor(cursor)
 
     def scroll_value_changed(self):
         """
@@ -170,6 +181,18 @@ class TextEvent(TextUI):
         self.plain_text.setStyleSheet(self.show_style)
         self.setting_win.show()
         self.is_show_setting_win = True
+
+    def find_text(self, text, direction):
+        flag = QTextDocument.FindFlags()
+        if direction == "reverse":
+            flag = QTextDocument.FindBackward
+        find = self.plain_text.find(text, flag)
+        if not find:
+            msg = QMessageBox(self)
+            msg.setIcon(QMessageBox.Information)
+            msg.setText("找不到了！")
+            msg.setWindowTitle("成功")
+            msg.show()
 
     def create_menu(self):
         """
@@ -200,12 +223,18 @@ class TextEvent(TextUI):
         self.tray_icon.show()
 
     @staticmethod
-    def load_text(file_path):
-        if file_path == "":
+    def load_text(cur_file):
+        try:
+            file = QFile(cur_file)
+            if file.open(QIODevice.ReadOnly | QIODevice.Text):
+                stream = QTextStream(file)
+                # stream.setCodec("utf8")
+                return stream.readAll()
+            else:
+                return ""
+        except Exception as e:
+            print(e)
             return ""
-        with open(file_path, "r") as file:
-            text = file.read()
-        return text
 
     @staticmethod
     def quit_app():

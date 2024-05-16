@@ -14,13 +14,14 @@ class SettingUI(QWidget):
         super().__init__()
         self.conf = Conf(self.confPath)
         # 防止主窗口跟随子窗口一起关闭
-        self.setWindowFlag(QtCore.Qt.Tool)
+        # self.setWindowFlag(QtCore.Qt.Window)
 
         self.file_label = QLabel("文件：")
         self.line_height_label = QLabel("行高：")
         self.font_size_label = QLabel("字体大小：")
         self.font_color_label = QLabel("字体颜色：")
         self.background_color_label = QLabel("背景颜色：")
+        self.find_label = QLabel("查找：")
 
         self.file_Edit = QLineEdit()
         self.file_Edit.setObjectName("file_Edit")
@@ -32,6 +33,8 @@ class SettingUI(QWidget):
         self.font_color_Edit.setObjectName("font_color_Edit")
         self.background_color_Edit = QLineEdit()
         self.background_color_Edit.setObjectName("background_color_Edit")
+        self.find_Edit = QLineEdit()
+        self.find_Edit.setObjectName("find_Edit")
 
         self.select_file_button = QPushButton("选择文件")
         self.select_file_button.setObjectName("select_file_button")
@@ -41,6 +44,10 @@ class SettingUI(QWidget):
         self.select_background_color_button.setObjectName("select_background_color_button")
         self.save_button = QPushButton("保存")
         self.save_button.setObjectName("save_button")
+        self.find_next_button = QPushButton("下一个")
+        self.find_next_button.setObjectName("find_next_button")
+        self.find_up_button = QPushButton("上一个")
+        self.find_up_button.setObjectName("find_up_button")
         self.close_button = QPushButton("取消")
         self.close_button.setObjectName("close_button")
 
@@ -84,6 +91,15 @@ class SettingUI(QWidget):
         h_box5.addWidget(self.select_background_color_button)
 
         vbox.addLayout(h_box5)
+        vbox.addStretch(1)
+
+        h_box6 = QHBoxLayout()
+        h_box6.addWidget(self.find_label)
+        h_box6.addWidget(self.find_Edit)
+        h_box6.addWidget(self.find_next_button)
+        h_box6.addWidget(self.find_up_button)
+
+        vbox.addLayout(h_box6)
         vbox.addStretch(3)
 
         h_box6 = QHBoxLayout()

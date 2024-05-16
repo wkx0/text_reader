@@ -8,6 +8,7 @@ from ui.setting_ui import SettingUI
 class SettingEvent(SettingUI):
     _signal: pyqtSignal = pyqtSignal(str, str, str, str, str)
     _close_signal: pyqtSignal = pyqtSignal(str)
+    _find_signal: pyqtSignal = pyqtSignal(str, str)
 
     def __init__(self):
         super().__init__()
@@ -68,6 +69,16 @@ class SettingEvent(SettingUI):
         self.close()
         self._close_signal.emit("close")
 
+    @QtCore.pyqtSlot()
+    def on_find_next_button_clicked(self):
+        find_text = self.find_Edit.text()
+        self._find_signal.emit(find_text, "next")
+
+    @QtCore.pyqtSlot()
+    def on_find_up_button_clicked(self):
+        find_text = self.find_Edit.text()
+        self._find_signal.emit(find_text, "reverse")
+
     def load_config(self):
         if self.conf.text_path != "":
             self.file_Edit.setText(self.conf.text_path)
@@ -80,6 +91,10 @@ class SettingEvent(SettingUI):
         if self.conf.background_color != "":
             self.background_color_Edit.setText(self.conf.background_color)
 
+    def closeEvent(self, event):
+        event.ignore()  # 阻止默认关闭行为
+        self.hide()  # 隐藏子窗口而不关闭
+
     @property
     def signal(self):
         return self._signal
@@ -87,3 +102,7 @@ class SettingEvent(SettingUI):
     @property
     def close_signal(self):
         return self._close_signal
+
+    @property
+    def find_signal(self):
+        return self._find_signal
