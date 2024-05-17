@@ -6,12 +6,13 @@ from ui.setting_ui import SettingUI
 
 
 class SettingEvent(SettingUI):
-    _signal: pyqtSignal = pyqtSignal(str, str, str, str, str)
+    _signal: pyqtSignal = pyqtSignal(str, str, str, str, str, str)
     _close_signal: pyqtSignal = pyqtSignal(str)
     _find_signal: pyqtSignal = pyqtSignal(str, str)
 
-    def __init__(self):
+    def __init__(self, conf):
         super().__init__()
+        self.conf = conf
         self.load_config()
         QMetaObject.connectSlotsByName(self)  # 自动自动连接信号和槽
 
@@ -46,18 +47,20 @@ class SettingEvent(SettingUI):
     @QtCore.pyqtSlot()
     def on_save_button_clicked(self):
         file = self.file_Edit.text()
+        encoding = self.encoding_Box.currentText()
         line_height = self.line_height_Edit.text()
         font_size = self.font_size_Edit.text()
         font_color = self.font_color_Edit.text()
         background_color = self.background_color_Edit.text()
 
         self.conf.set_text_path(file)
-        self.conf.set_line_height(line_height)
+        self.conf.set_text_encoding(encoding)
         self.conf.set_font_size(font_size)
         self.conf.set_font_color(font_color)
+        self.conf.set_line_height(line_height)
         self.conf.set_background_color(background_color)
         # 通知主窗口更新UI
-        self._signal.emit(file, line_height, font_size, font_color, background_color)
+        self._signal.emit(file, encoding, line_height, font_size, font_color, background_color)
         msg = QMessageBox(self)
         msg.setIcon(QMessageBox.Information)
         msg.setText("保存成功！")
@@ -80,15 +83,17 @@ class SettingEvent(SettingUI):
         self._find_signal.emit(find_text, "reverse")
 
     def load_config(self):
-        if self.conf.text_path != "":
+        if self.conf.text_path is not None:
             self.file_Edit.setText(self.conf.text_path)
-        if self.conf.line_height != "":
+        if self.conf.text_encoding is not None:
+            self.encoding_Box.setCurrentText(self.conf.text_encoding)
+        if self.conf.line_height is not None:
             self.line_height_Edit.setValue(int(self.conf.line_height))
-        if self.conf.font_size != "":
+        if self.conf.font_size is not None:
             self.font_size_Edit.setValue(int(self.conf.font_size))
-        if self.conf.font_color != "":
+        if self.conf.font_color is not None:
             self.font_color_Edit.setText(self.conf.font_color)
-        if self.conf.background_color != "":
+        if self.conf.background_color is not None:
             self.background_color_Edit.setText(self.conf.background_color)
 
     def closeEvent(self, event):
@@ -106,3 +111,7 @@ class SettingEvent(SettingUI):
     @property
     def find_signal(self):
         return self._find_signal
+
+    @property
+    def encoding_signal(self):
+        return self._encoding_signal

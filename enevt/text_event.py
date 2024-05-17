@@ -14,8 +14,9 @@ class TextEvent(TextUI):
     def __init__(self):
         super().__init__()
         self.cur_file = ""
+        self.cur_encoding = "utf-8"
         self.tray_icon = None  # 托盘图标
-        self.setting_win = SettingWin()  # 设置窗口
+        self.setting_win = SettingWin(self.conf)  # 设置窗口
         self.is_show_setting_win = False  # 是否显示设置窗口
         self.is_mover = False
         self.m_pos = None
@@ -132,17 +133,17 @@ class TextEvent(TextUI):
         :param event:
         :return:
         """
-        self.cur_file = self.conf.text_path
-        text = self.load_text(self.conf.text_path)
+        if self.conf.text_encoding is None:
+            self.cur_encoding = "utf-8"
+            self.conf.set_text_encoding("utf-8")
+        text = self.load_text()
         self.plain_text.setPlainText(text)
-        if text != "":
-            self.plain_text.setPlainText(text)
-            if self.conf.line != "":
-                cursor = self.plain_text.textCursor()
-                cursor.movePosition(cursor.Start)  # 将光标移动到文本开头
-                for _ in range(int(self.conf.line) + self.plain_text.verticalScrollBar().pageStep()):  # 移动光标到指定行之前
-                    cursor.movePosition(cursor.Down)
-                self.plain_text.setTextCursor(cursor)  # 将光标移动到指定行
+        if text != "" and self.conf.line is not None:
+            cursor = self.plain_text.textCursor()
+            cursor.movePosition(cursor.Start)  # 将光标移动到文本开头
+            for _ in range(int(self.conf.line) + self.plain_text.verticalScrollBar().pageStep()):  # 移动光标到指定行之前
+                cursor.movePosition(cursor.Down)
+            self.plain_text.setTextCursor(cursor)  # 将光标移动到指定行
 
     def resizeEvent(self, event):
         """
@@ -158,10 +159,11 @@ class TextEvent(TextUI):
         self.conf.set_win_x(event.pos().x())
         self.conf.set_win_y(event.pos().y())
 
-    def update_ui(self, file, line_height, font_size, font_color, background_color):
-        if file != self.cur_file:
+    def update_ui(self, file, encoding, line_height, font_size, font_color, background_color):
+        if file != self.cur_file or encoding != self.cur_encoding:
             self.cur_file = file
-            text = self.load_text(file)
+            self.cur_encoding = encoding
+            text = self.load_text()
             self.plain_text.setPlainText(text)
         self.plain_text.setStyleSheet(self.generate_style(font_color, font_size, line_height, background_color))
 
@@ -200,9 +202,7 @@ class TextEvent(TextUI):
         创建菜单
         :return:
         """
-
         tray_menu = QMenu()
-
         # 添加菜单项到菜单
         tray_menu.addAction("设置", self.open_setting_win)
         tray_menu.addAction("退出", self.quit_app)
@@ -223,19 +223,23 @@ class TextEvent(TextUI):
         # 在系统托盘中显示图标
         self.tray_icon.show()
 
-    @staticmethod
-    def load_text(cur_file):
+    def load_text(self, encoding=None):
+        text = ""
+        if self.conf.text_path is not None:
+            self.cur_file = self.conf.text_path
+        if encoding is not None:
+            self.cur_encoding = encoding
+
         try:
-            file = QFile(cur_file)
+            file = QFile(self.cur_file)
             if file.open(QIODevice.ReadOnly | QIODevice.Text):
                 stream = QTextStream(file)
-                # stream.setCodec("utf8")
-                return stream.readAll()
-            else:
-                return ""
+                stream.setCodec(self.cur_encoding)
+                text = stream.readAll()
         except Exception as e:
             print(e)
-            return ""
+
+        return text
 
     @staticmethod
     def quit_app():

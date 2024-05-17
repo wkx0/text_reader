@@ -79,10 +79,18 @@ class Conf:
     def set_background_color(self, value):
         self.set_option("text", "background_color", str(value))
 
+    @property
+    def text_encoding(self):
+        return self.get_option("text", "encoding")
+
+    def set_text_encoding(self, value):
+        self.set_option("text", "encoding", str(value))
+
     def get_option(self, section, option):
         if self.section_and_option_is(section, option):
             value = self.config.get(section, option)
-            return value
+            if value != "" and value is not None:
+                return value
         else:
             return None
 

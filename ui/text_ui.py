@@ -70,20 +70,24 @@ class TextUI(QWidget):
         生成样式
         :return:
         """
-        font_color = font_color if font_color is not None else self.conf.font_color
-        font_size = font_size if font_size is not None else self.conf.font_size
-        line_height = line_height if line_height is not None else self.conf.line_height
-        background_color = background_color if background_color is not None else self.conf.background_color
-        if font_color == "":
-            font_color = "white"
-            self.conf.set_font_color("white")
-        if font_size == "":
-            font_size = 14
-            self.conf.set_font_size(font_size)
-        if line_height == "":
+        if font_color is None:
+            font_color = self.conf.font_color
+        if font_size is None:
+            font_size = self.conf.font_size
+        if line_height is None:
+            line_height = self.conf.line_height
+        if background_color is None:
+            background_color = self.conf.background_color
+        if line_height is None:
             line_height = 14
             self.conf.set_line_height(line_height)
-        if background_color == "":
+        if font_size is None:
+            font_size = 14
+            self.conf.set_font_size(font_size)
+        if font_color is None:
+            font_color = "white"
+            self.conf.set_font_color(font_color)
+        if background_color is None:
             background_color = "#808080"
             self.conf.set_background_color(background_color)
 

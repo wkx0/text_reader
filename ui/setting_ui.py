@@ -2,21 +2,21 @@
 from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QWidget, QApplication, QLabel, QLineEdit, QSpinBox, QPushButton, QHBoxLayout, QVBoxLayout, \
-    QSpacerItem, QSizePolicy
+    QSpacerItem, QSizePolicy, QComboBox
 
 from utils.config_utils import Conf
 
 
 class SettingUI(QWidget):
-    confPath = r"./conf/Config.conf"
 
     def __init__(self):
         super().__init__()
-        self.conf = Conf(self.confPath)
+
         # 防止主窗口跟随子窗口一起关闭
         # self.setWindowFlag(QtCore.Qt.Window)
 
         self.file_label = QLabel("文件：")
+        self.encoding_label = QLabel("编码方式：")
         self.line_height_label = QLabel("行高：")
         self.font_size_label = QLabel("字体大小：")
         self.font_color_label = QLabel("字体颜色：")
@@ -25,6 +25,12 @@ class SettingUI(QWidget):
 
         self.file_Edit = QLineEdit()
         self.file_Edit.setObjectName("file_Edit")
+
+        self.encoding_Box = QComboBox()
+        self.encoding_Box.addItem("utf-8")
+        self.encoding_Box.addItem("gbk")
+        self.encoding_Box.setObjectName("encoding_Box")
+
         self.line_height_Edit = QSpinBox()
         self.line_height_Edit.setObjectName("line_height_Edit")
         self.font_size_Edit = QSpinBox()
@@ -61,6 +67,14 @@ class SettingUI(QWidget):
 
         # 添加到垂直布局
         vbox.addLayout(h_box)
+        vbox.addStretch(1)
+
+        h_box1 = QHBoxLayout()
+        h_box1.addWidget(self.encoding_label)
+        h_box1.addWidget(self.encoding_Box)
+        h_box1.addStretch(1)
+
+        vbox.addLayout(h_box1)
         vbox.addStretch(1)
 
         h_box2 = QHBoxLayout()
